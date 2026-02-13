@@ -46,26 +46,33 @@ async def list_tools() -> list[Tool]:
     return [
         Tool(
             name="eywa_get",
-            description=(
-                "Retrieve past session handoffs for context continuity. "
-                "Without a query, returns recent sessions; with a query, returns top keyword matches."
-            ),
+            description="""Retrieve past session handoffs for context continuity.
+
+Called at session start or when you need context about past work.
+
+- No query: returns 3 most recent substantial sessions.
+- With query: keyword-matches against past sessions, returns top matches.
+
+Examples:
+- eywa_get()
+- eywa_get(query="sorbent reasoning tokens")
+- eywa_get(query="river mcp", days_back=30, max_handoffs=5)""",
             inputSchema={
                 "type": "object",
                 "properties": {
                     "query": {
                         "type": "string",
-                        "description": "Keywords or topic for retrieval.",
+                        "description": "What are we working on? Keywords, project name, topic.",
                     },
                     "days_back": {
                         "type": "integer",
                         "default": 14,
-                        "description": "How far back to search.",
+                        "description": "How far back to search (default 14 days).",
                     },
                     "max_handoffs": {
                         "type": "integer",
                         "default": 3,
-                        "description": "Maximum number of handoffs to return (max 5).",
+                        "description": "How many handoffs to return (default 3, max 5).",
                     },
                 },
                 "required": [],
@@ -73,15 +80,23 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="eywa_extract",
-            description=(
-                "Extract and persist a handoff from the active session or a specific session_id."
-            ),
+            description="""Extract a handoff from the current session (or a specified session).
+
+Called at end of session to persist a handoff document.
+Extracts key decisions, insights, and open threads via Sonnet 4.5.
+
+- No args: auto-detects current session via PID tracing + mtime.
+- With session_id: extracts that specific session.
+
+Examples:
+- eywa_extract()
+- eywa_extract(session_id="1b2f6f6b-65a6-42ff-aca7-34889b422799")""",
             inputSchema={
                 "type": "object",
                 "properties": {
                     "session_id": {
                         "type": "string",
-                        "description": "Optional full session UUID. Auto-detected if omitted.",
+                        "description": "Session UUID. Auto-detected if omitted.",
                     }
                 },
                 "required": [],
@@ -137,6 +152,7 @@ async def _handle_eywa_extract(arguments: dict[str, Any]) -> list[TextContent]:
         session_uuid = jsonl_path.stem
         short_id = session_uuid[:8]
 
+        # Check if handoff already exists -- skip only if JSONL content hasn't changed
         try:
             retrieval = get_retrieval()
             current_entry = retrieval.index.get("handoffs", {}).get(short_id)
@@ -152,6 +168,7 @@ async def _handle_eywa_extract(arguments: dict[str, Any]) -> list[TextContent]:
                                 text=f"Handoff already exists for {short_id} (session unchanged)",
                             )
                         ]
+                    logger.info("Re-extracting %s: session updated since last handoff", short_id)
                 except ValueError:
                     logger.warning("Invalid date in index for %s: %r", short_id, handoff_date)
         except FileNotFoundError:

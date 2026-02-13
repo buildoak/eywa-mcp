@@ -47,6 +47,7 @@ SESSIONS_DIR = _path_from_env(
     "EYWA_SESSIONS_DIR", str(Path.home() / ".claude" / "projects")
 )
 TASKS_DIR = _path_from_env("EYWA_TASKS_DIR", str(SESSIONS_DIR.parent / "tasks"))
+SESSIONS_MD_DIR = _path_from_env("EYWA_SESSIONS_MD_DIR", "")
 
 CLAUDE_MODEL = os.getenv("EYWA_CLAUDE_MODEL", "sonnet")
 OPENROUTER_MODEL = os.getenv(

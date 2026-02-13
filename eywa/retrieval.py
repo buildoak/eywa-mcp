@@ -87,7 +87,7 @@ STOPWORDS = {
     "there",
 }
 
-KNOWN_SHORT = {"hr", "ai", "ml", "kb", "qa", "ui", "ux", "api", "cli", "os", "mcp", "llm", "gpu", "3d"}
+KNOWN_SHORT = {"hr", "ai", "ml", "kb", "qa", "ui", "ux", "api", "cli", "os", "mcp", "llm", "gpu", "tg", "3d"}
 
 
 class EywaRetrieval:

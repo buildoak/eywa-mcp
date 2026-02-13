@@ -1,5 +1,11 @@
 """Eywa MCP package."""
 
-from .server import cli
+
+def cli():
+    """Entry point — lazy import to avoid mcp namespace collision."""
+    from .server import cli as _cli
+
+    _cli()
+
 
 __all__ = ["cli"]

@@ -10,8 +10,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-import yaml
-
 from .config import CLAUDE_MODEL, EXTRACTORS_DIR, HANDOFFS_DIR
 
 logger = logging.getLogger(__name__)
@@ -21,20 +19,35 @@ SCHEMA_PATH = EXTRACTORS_DIR / "handoff_schema.json"
 EXTRACT_SCRIPT = EXTRACTORS_DIR / "extract.mjs"
 
 
+def _yaml_quote(value: str) -> str:
+    """Quote a string for YAML frontmatter if it contains special characters."""
+    if not value:
+        return '""'
+    needs_quoting = any(
+        c in value
+        for c in (':', '<', '>', '{', '}', '[', ']', '#', '&', '*', '!', '|', '"', "'", '%', '@')
+    )
+    if needs_quoting:
+        escaped = value.replace('\\', '\\\\').replace('"', '\\"')
+        return f'"{escaped}"'
+    return value
+
+
 def _json_to_markdown(data: dict[str, Any]) -> str:
     """Convert validated JSON handoff output into markdown with frontmatter."""
-    frontmatter = {
-        "session_id": data["session_id"],
-        "date": data["date"],
-        "duration": data.get("duration", ""),
-        "model": data.get("model", ""),
-        "headline": data["headline"],
-        "projects": data.get("projects", []),
-        "keywords": data.get("keywords", []),
-        "substance": data["substance"],
-    }
-
-    lines = ["---", yaml.safe_dump(frontmatter, sort_keys=False).strip(), "---", ""]
+    lines = ["---"]
+    lines.append(f"session_id: {data['session_id']}")
+    lines.append(f"date: {data['date']}")
+    if data.get("duration"):
+        lines.append(f"duration: {_yaml_quote(str(data['duration']))}")
+    if data.get("model"):
+        lines.append(f"model: {_yaml_quote(str(data['model']))}")
+    lines.append(f"headline: {_yaml_quote(data['headline'])}")
+    lines.append(f"projects: [{', '.join(data.get('projects', []))}]")
+    lines.append(f"keywords: [{', '.join(data.get('keywords', []))}]")
+    lines.append(f"substance: {data['substance']}")
+    lines.append("---")
+    lines.append("")
     lines.append(f"# {data['headline']}")
 
     if data["substance"] == 0:
@@ -171,6 +184,10 @@ def save_handoff(
     if not session_id or not date_str:
         logger.error("Cannot save handoff: missing session_id/date in frontmatter")
         return None
+
+    # Ensure date is a string (YAML may parse as datetime.date)
+    if hasattr(date_str, "isoformat"):
+        date_str = date_str.isoformat()
 
     try:
         year, month, day = date_str.split("-")
