@@ -1,6 +1,6 @@
 # Eywa MCP
 
-**Cross-session memory for Claude Code.**
+**Cross-session memory for Claude Code (MCP server + CLI).**
 
 [![Build](https://img.shields.io/badge/build-placeholder-lightgrey)](#)
 [![PyPI](https://img.shields.io/badge/pypi-placeholder-lightgrey)](#)
@@ -60,6 +60,7 @@ Run `eywa-mcp` alongside Claude Code for ongoing sessions.
 
 - Uses Claude (Sonnet) extraction at session end (`eywa_extract()`)
 - Retrieves relevant context at session start (`eywa_get()`)
+- Installs a companion CLI (`eywa`) for scripts and manual use
 
 ## Installation
 ### Prerequisites
@@ -67,7 +68,20 @@ Run `eywa-mcp` alongside Claude Code for ongoing sessions.
 - Node.js 18+
 - Claude Code
 
-### 1) Install Python package
+### Option A: Bootstrap (recommended)
+Run the repo bootstrap script to check prerequisites and install both Python and Node dependencies:
+
+```bash
+./setup.sh
+```
+
+This installs three commands:
+- `eywa-mcp` (MCP stdio server)
+- `eywa` (CLI: get/extract/rebuild-index)
+- `eywa-batch` (OpenRouter-powered batch indexing)
+
+### Option B: Manual install
+### 1) Install Python package (editable)
 ```bash
 pip install -e .
 ```
@@ -117,7 +131,7 @@ eywa-mcp
 | `EYWA_LOG_LEVEL` | `INFO` | Logging verbosity |
 
 ## Usage
-Eywa exposes two MCP tools.
+Eywa exposes two MCP tools (for Claude Code) and a CLI (for humans/scripts).
 
 ### `eywa_get()`
 Retrieve relevant context from prior handoffs.
@@ -163,6 +177,18 @@ Auto-detect active session:
 Explicit session ID:
 ```json
 {"session_id": "12345678-1234-1234-1234-123456789abc"}
+```
+
+### CLI (`eywa`)
+Manual equivalents of the MCP tools:
+
+```bash
+eywa get                          # 3 most recent sessions
+eywa get "mcp tool routing" --days-back 30 --max 5
+eywa extract                      # auto-detect current session
+eywa extract 1b2f6f6b             # 8-char short ID
+eywa extract 1b2f6f6b-65a6-...    # full UUID
+eywa rebuild-index                # rebuild index from stored handoffs
 ```
 
 ## Batch Indexing

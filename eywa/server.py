@@ -83,7 +83,8 @@ Examples:
             description="""Extract a handoff from the current session (or a specified session).
 
 Called at end of session to persist a handoff document.
-Extracts key decisions, insights, and open threads via Sonnet 4.5.
+Extracts key decisions, insights, and open threads via the Anthropic Claude model configured by
+`EYWA_CLAUDE_MODEL` (default: `sonnet`) using the Claude Agent SDK.
 
 - No args: auto-detects current session via PID tracing + mtime.
 - With session_id: extracts that specific session.
