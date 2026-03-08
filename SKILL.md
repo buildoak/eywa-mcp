@@ -18,29 +18,31 @@ Cross-session memory. Extracts handoffs at session end, retrieves past context a
 **All commands use this exact pattern — no variations:**
 
 ```bash
-cd /Users/otonashi/thinking/pratchett-os/coordinator/.claude/skills/eywa-continuum && /Users/otonashi/thinking/pratchett-os/.venv/bin/python -m eywa.cli <command> [args]
+cd "$EYWA_REPO" && python -m eywa.cli <command> [args]
 ```
+
+Where `$EYWA_REPO` is the path to this repository (the directory containing the `eywa/` package). If using a virtualenv, activate it first or use its Python binary directly.
 
 ### Copy-paste commands
 
 ```bash
 # Get recent sessions (default 3)
-cd /Users/otonashi/thinking/pratchett-os/coordinator/.claude/skills/eywa-continuum && /Users/otonashi/thinking/pratchett-os/.venv/bin/python -m eywa.cli get
+cd "$EYWA_REPO" && python -m eywa.cli get
 
 # Get by keyword search
-cd /Users/otonashi/thinking/pratchett-os/coordinator/.claude/skills/eywa-continuum && /Users/otonashi/thinking/pratchett-os/.venv/bin/python -m eywa.cli get "mcp routing"
+cd "$EYWA_REPO" && python -m eywa.cli get "mcp routing"
 
 # Get with options
-cd /Users/otonashi/thinking/pratchett-os/coordinator/.claude/skills/eywa-continuum && /Users/otonashi/thinking/pratchett-os/.venv/bin/python -m eywa.cli get "topic" --days-back 30 --max 5
+cd "$EYWA_REPO" && python -m eywa.cli get "topic" --days-back 30 --max 5
 
 # Extract current session (auto-detect)
-cd /Users/otonashi/thinking/pratchett-os/coordinator/.claude/skills/eywa-continuum && /Users/otonashi/thinking/pratchett-os/.venv/bin/python -m eywa.cli extract
+cd "$EYWA_REPO" && python -m eywa.cli extract
 
 # Extract specific session (8-char short ID or full UUID)
-cd /Users/otonashi/thinking/pratchett-os/coordinator/.claude/skills/eywa-continuum && /Users/otonashi/thinking/pratchett-os/.venv/bin/python -m eywa.cli extract 1b2f6f6b
+cd "$EYWA_REPO" && python -m eywa.cli extract 1b2f6f6b
 
 # Rebuild index
-cd /Users/otonashi/thinking/pratchett-os/coordinator/.claude/skills/eywa-continuum && /Users/otonashi/thinking/pratchett-os/.venv/bin/python -m eywa.cli rebuild-index
+cd "$EYWA_REPO" && python -m eywa.cli rebuild-index
 ```
 
 Output goes to stdout, errors to stderr. Exit code 0 = success, 1 = failure.
